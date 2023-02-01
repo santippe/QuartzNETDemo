@@ -30,7 +30,7 @@ namespace QuartzNETDemoLibrary
                 var trigger = TriggerBuilder.Create()
                     //.WithIdentity("myTrigger", "group1")
                     //.WithCronSchedule("0 0 8 * * ?")  //8:00 AM everyday
-                    .WithCronSchedule(configurationItem.ServiceTrigger)  //8:00 AM everyday
+                    .WithCronSchedule(configurationItem.ServiceTrigger)  //8:00 AM everyday                    
                     .Build();
 
                 // Schedule the job
@@ -59,7 +59,9 @@ namespace QuartzNETDemoLibrary
                 JobDataMap dataMap = context.JobDetail.JobDataMap;
                 _id = _id ?? (Guid?)dataMap.Get("id");
                 //we can start a service
-                Console.WriteLine($"Job {_id} running at " + DateTime.Now);
+                Console.WriteLine($"Job {_id} starting at {DateTime.Now.ToString("HH:mm:ss.fff")}");
+                await Task.Delay(10000);
+                Console.WriteLine($"Job {_id} finished at {DateTime.Now.ToString("HH:mm:ss.fff")}");
             }
         }
     }
