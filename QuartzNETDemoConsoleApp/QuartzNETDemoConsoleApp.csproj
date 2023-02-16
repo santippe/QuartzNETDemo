@@ -17,10 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Database1.mdf">
+    <None Update="database1.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Database1_log.ldf">
+    <None Update="database1_log.ldf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,19 +1,26 @@
+using Quartz;
 using QuartzNETDemoLibrary;
 using QuartzNETDemoLibrary.Models;
 
 namespace QuartxNETDemoTest
 {
-    public class UnitTest1
+    public class SchedulerTest
     {
+        private readonly SchedulerService _schedulerService;
+
+        public SchedulerTest()
+        {
+            _schedulerService = new SchedulerService();            
+        }
+
         [Fact]
         public async Task SchedulerTestAsync()
         {
-            var scheduler = new SchedulerService();
-            await scheduler.ConfigureSchedulerAsync(new SchedulerConfiguration[]
+            _schedulerService.ConfigureScheduler(new SchedulerConfiguration[]
             {
                 new SchedulerConfiguration(Guid.NewGuid(),"0/2 * * * * ?")
             });
-            await scheduler.StartAsync();
+            _schedulerService.Start();
             await Task.Delay(10000);
             //await scheduler.StopAsync();
         }

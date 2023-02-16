@@ -13,15 +13,15 @@ var db = new DBContext1(options);
 var entites = await db.SchedulerConfiguration.ToArrayAsync();
 
 var scheduler = new SchedulerService();
-await scheduler.ConfigureSchedulerAsync(entites);
+scheduler.ConfigureScheduler(entites);
 //await scheduler.ConfigureSchedulerAsync(new SchedulerConfiguration[]
 //{
 //    new SchedulerConfiguration(Guid.NewGuid(),"0/2 * * * * ?"),
 //    new SchedulerConfiguration(Guid.NewGuid(),"0/5 * * * * ?"),
 //    new SchedulerConfiguration(Guid.NewGuid(),"1/2 * * * * ?")
 //});
-await scheduler.StartAsync();
+scheduler.Start();
 
 Console.ReadLine();
 
-await scheduler.StopAsync();
+scheduler.Stop();

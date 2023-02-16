@@ -8,14 +8,28 @@ var builder = WebApplication
 var app = builder.Build();
 
 var scheduler = new SchedulerService();
-await scheduler.StartAsync();
+scheduler.Start();
 
 // Configure the HTTP request pipeline.
-app.MapGet("/configure", async (SchedulerConfiguration[] configuration) =>
+app.MapPost("/configure", (SchedulerConfiguration[] configuration) =>
 {
-    await scheduler.StopAsync();
-    await scheduler.ConfigureSchedulerAsync(configuration);
-    await scheduler.StartAsync();
+    scheduler.Stop();
+    scheduler.ConfigureScheduler(configuration);
+    scheduler.Start();
+});
+
+app.MapPost("/append", async (SchedulerConfiguration[] configuration) =>
+{
+    scheduler.Stop();
+    await scheduler.AddSchedulerTaskAsync(configuration);
+    scheduler.Start();
+});
+
+app.MapPost("/remove", async (SchedulerConfiguration[] configuration) =>
+{
+    scheduler.Stop();
+    await scheduler.RemoveSchedulerTaskAsync(configuration);
+    scheduler.Start();
 });
 
 app.Run("http://*:3000");

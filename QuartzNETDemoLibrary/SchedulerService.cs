@@ -7,6 +7,8 @@ namespace QuartzNETDemoLibrary
     public class SchedulerService
     {
         private IScheduler _scheduler;
+        private readonly object _lock = new object();
+
 
         public SchedulerService()
         {
@@ -15,15 +17,38 @@ namespace QuartzNETDemoLibrary
             _scheduler = schedulerFactory.GetScheduler().Result;
         }
 
-        public async Task ConfigureSchedulerAsync(SchedulerConfiguration[] configuration)
+        public void ConfigureScheduler(SchedulerConfiguration[] configuration)
         {
             //clear all the scheduled jobs
-            await _scheduler.Clear();
+            lock (_lock)
+            {
+                _scheduler.Clear().GetAwaiter().GetResult();
 
+                foreach (var configurationItem in configuration)
+                {
+                    var job = JobBuilder.Create<MyJob>()
+                        //.WithIdentity("myJob", "group1")
+                        .UsingJobData("id", configurationItem.ServiceId.Value)
+                        .Build();
+
+                    var trigger = TriggerBuilder.Create()
+                        //.WithIdentity("myTrigger", "group1")
+                        //.WithCronSchedule("0 0 8 * * ?")  //8:00 AM everyday
+                        .WithCronSchedule(configurationItem.ServiceTrigger)  //8:00 AM everyday                    
+                        .Build();
+
+                    // Schedule the job
+                    _scheduler.ScheduleJob(job, trigger).GetAwaiter().GetResult(); ;
+                }
+            }
+        }
+
+        public async Task AddSchedulerTaskAsync(SchedulerConfiguration[] configuration)
+        {
             foreach (var configurationItem in configuration)
             {
                 var job = JobBuilder.Create<MyJob>()
-                    //.WithIdentity("myJob", "group1")
+                    .WithIdentity(new JobKey(configurationItem.ServiceId?.ToString()))
                     .UsingJobData("id", configurationItem.ServiceId.Value)
                     .Build();
 
@@ -38,16 +63,30 @@ namespace QuartzNETDemoLibrary
             }
         }
 
-        public async Task StartAsync()
+        public async Task RemoveSchedulerTaskAsync(SchedulerConfiguration[] configuration)
         {
-            // Start the scheduler
-            await _scheduler.Start();
+            foreach (var configurationItem in configuration)
+            {
+                await _scheduler.DeleteJob(new JobKey(configurationItem.ServiceId?.ToString()));
+            }
         }
 
-        public async Task StopAsync()
+        public void Start()
         {
-            // Stop the scheduler
-            await _scheduler.Shutdown();
+            lock (_lock)
+            {
+                // Start the scheduler
+                _scheduler.Start().GetAwaiter().GetResult();
+            }
+        }
+
+        public void Stop()
+        {
+            lock (_lock)
+            {
+                // Start the scheduler
+                _scheduler.Shutdown().GetAwaiter().GetResult();
+            }
         }
 
         private class MyJob : IJob
